@@ -35,7 +35,16 @@ def train_one_step(model: torch.nn.Module, batch: dict[str, torch.Tensor], optim
         - optimizer.step();
         - optimizer.zero_grad();
     """
-    raise NotImplementedError("Implement train_one_step")
+    model.train()
+    outputs = model(batch)
+    loss = outputs.loss
+    if not torch.isfinite(loss):
+        raise ValueError(f"Non-finite loss detected: {loss.item()}")
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+
+    return float(loss.item())
 
 
 def run_training(config: dict[str, Any], fast_train: bool = False) -> None:
